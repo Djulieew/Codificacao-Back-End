@@ -20,14 +20,29 @@ export class AlunosService {
         return createAluno.save();
     }
 
-    async findAllPage(page: number, limit: number){
+    async findAllPage(page: number, limit: number, nome?: string, curso?: string){
         
         const skip = (page - 1) * limit;
+        const filtro: any = {};
+
+               if (nome) {
+            filtro.nome = {
+                $regex: new RegExp(nome, 'i'),// 'i' para case-insensitive
+            };
+        }
+
+        if (curso) {
+            filtro.cursos = {
+                $regex: new RegExp(curso, 'i'),// 'i' para case-insensitive
+            };
+        }
+
         const [data, total] = await Promise.all([
-            this.alunoModel.find().skip(skip).limit(limit).exec(),
-            this.alunoModel.countDocuments().exec()
+            this.alunoModel.find(filtro).skip(skip).limit(limit).exec(),
+            this.alunoModel.countDocuments(filtro).exec()
         ]);
 
+ 
         return { 
             data,
             meta: {
@@ -42,7 +57,7 @@ export class AlunosService {
     //GET
     async findAll(): Promise<Aluno[]> {
         return this.alunoModel.find().exec();
-    } //GET
+    } //
 
     async findOne(id: string): Promise <Aluno> {
         const aluno = await this.alunoModel.findById(id).exec();
