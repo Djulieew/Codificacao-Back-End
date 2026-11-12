@@ -44,7 +44,7 @@ export class AlunosController {
 
     @Get()
     @ApiOperation({
-        summary: 'Retorna a lista de alunos cadastrados com paginação e filtros opcionais',
+        summary: 'Retorna a lista de alunos cadastrados com paginação, filtros opcionais e ordenação',
     })@ApiResponse({
         status: 200,
         description: 'Lista de alunos retornada com sucesso.',
@@ -67,7 +67,7 @@ export class AlunosController {
         name: 'limit',
         required: false,
         type: Number,
-        description: 'Número de itens por página (padrão: 10)',
+        description: 'Itens por página (padrão: 10)',
 
     })
     @ApiQuery({
@@ -82,16 +82,38 @@ export class AlunosController {
         type: String,
         description: 'Filtro pelo nome do curso',
     })
+    @ApiQuery({
+        name: 'orderBy',
+        required: false,
+        type: String,
+        description: 'Campo para ordenação de resultados(ex: nome, idade, matrícula, cursos)',
+    })
+    @ApiQuery({
+        name: 'orderDirection',
+        required: true,
+        enum: [
+            'asc',
+            'desc'
+        ],
+        description: 'Direção da ordenação (ascendente ou descendente)',
+    })
 
-    findAllPage
-        (@Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number, 
+    findAllPageFilter(
+         @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number, 
          @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
          @Query('nome') nome?: string,
          @Query('curso') curso?: string,
-        
+         @Query('orderBy') orderBy?: string,
+            @Query('orderDirection') orderDirection?: 'asc' | 'desc'
         
 ){
-        return this.alunosService.findAllPage(page, limit, nome, curso);
+        return this.alunosService.findAllPageFilter (
+            page, 
+            limit,
+            nome, 
+            curso, 
+            orderBy, 
+            orderDirection);
     }
     
     @Get(':id')

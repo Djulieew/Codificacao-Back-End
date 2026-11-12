@@ -20,7 +20,15 @@ export class AlunosService {
         return createAluno.save();
     }
 
-    async findAllPage(page: number, limit: number, nome?: string, curso?: string){
+    async findAllPageFilter(
+        page: number, 
+        limit: number, 
+        nome?: string, 
+        curso?: string,
+        orderBy?: string,
+        orderDirection?:'asc' | 'desc',
+    
+    ){
         
         const skip = (page - 1) * limit;
         const filtro: any = {};
@@ -36,9 +44,13 @@ export class AlunosService {
                 $regex: new RegExp(curso, 'i'),// 'i' para case-insensitive
             };
         }
+        const sort: any = {};
+        if (orderBy) {
+            sort[orderBy] = orderDirection === 'desc' ? -1 : 1;
+        }
 
         const [data, total] = await Promise.all([
-            this.alunoModel.find(filtro).skip(skip).limit(limit).exec(),
+            this.alunoModel.find(filtro).sort(sort).skip(skip).limit(limit).exec(),
             this.alunoModel.countDocuments(filtro).exec()
         ]);
 
